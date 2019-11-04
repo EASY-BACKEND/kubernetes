@@ -124,8 +124,7 @@ data:
       ]
     }
   net-conf.json: |
-    {      
-  #此处数值应与kubeadm --pod-network-cidr指定的值一致
+    {
       "Network": "10.244.0.0/16",
       "Backend": {
         "Type": "vxlan"
