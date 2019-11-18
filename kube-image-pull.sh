@@ -1,8 +1,8 @@
 #!/bin/bash
-KUBE_VERSION=v1.17.0-alpha.0
+KUBE_VERSION=v1.15.4
 KUBE_PAUSE_VERSION=3.1
-ETCD_VERSION=3.2.18
-DNS_VERSION=1.1.3
+ETCD_VERSION=3.3.10
+DNS_VERSION=1.3.1
 username=mirrorgooglecontainers
 
 images="kube-proxy-amd64:${KUBE_VERSION} 
@@ -15,13 +15,15 @@ etcd-amd64:${ETCD_VERSION}
 
 for image in $images
 do
+    ##remove "-amd64"
+    newImage=${image//-amd64/}
     docker pull ${username}/${image}
-    docker tag ${username}/${image} k8s.gcr.io/${image}
-    #docker tag ${username}/${image} gcr.io/google_containers/${image}
+    docker tag ${username}/${image} k8s.gcr.io/${newImage}
     docker rmi ${username}/${image}
 done
-docker pull anjia0532/coredns:${DNS_VERSION}
-docker tag anjia0532/coredns:${DNS_VERSION} k8s.grc.io/${DNS_VERSION}
-docker rmi anjia0532/coredns:${DNS_VERSION}
+docker pull coredns/coredns:${DNS_VERSION}
+docker tag coredns/coredns:${DNS_VERSION} k8s.gcr.io/coredns:{DNS_VERSION}
+docker rmi coredns/coredns:${DNS_VERSION}
+#remove var
 unset ARCH version images username
 
