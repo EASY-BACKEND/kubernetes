@@ -22,7 +22,7 @@ do
     docker rmi ${username}/${image}
 done
 docker pull coredns/coredns:${DNS_VERSION}
-docker tag coredns/coredns:${DNS_VERSION} k8s.gcr.io/coredns:{DNS_VERSION}
+docker tag coredns/coredns:${DNS_VERSION} k8s.gcr.io/coredns:${DNS_VERSION}
 docker rmi coredns/coredns:${DNS_VERSION}
 #remove var
 unset ARCH version images username
