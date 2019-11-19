@@ -1,10 +1,9 @@
 # kubernetes-dashboard部署
-<details><summary>参考资料</summary>
+## 参考资料
 * [kubernetes官方文档](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/)
 * [官方GitHub](https://github.com/kubernetes/dashboard)
 * [创建访问用户](https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md)
 * [解决chrome无法访问dashboard](https://blog.51cto.com/10616534/2430512)
-</details>
 
 -------
 
@@ -16,7 +15,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-b
 
 ------
 
-##生成自签证书
+## 生成自签证书
 1) 生成证书请求的key
 
 ```bash
@@ -36,7 +35,7 @@ openssl x509 -days 3650 -req -in dashboard.csr -signkey dashboard.key -out dashb
 
 ----------
 
-##部署kubernetes-dashboard
+## 部署kubernetes-dashboard
 1) 创建部署kubernetes-dashboard的yaml文件
 <details><summary>kubernetes-dashboard.yaml</summary><pre>
 \# Copyright 2017 The Kubernetes Authors.
@@ -348,8 +347,8 @@ kubectl delete pod -n kubernetes-dashboard <pod名>
 ```
 5) 如果chrome仍然无法访问，需要到设置里把证书设置为"受信任证书"
 
-##创建访问用户
-###创建用于访问dashboard的Service Account
+## 创建访问用户
+### 创建用于访问dashboard的Service Account
 admin-user.yaml:
 ```yaml
 apiVersion: v1
@@ -361,7 +360,7 @@ metadata:
 ```bash
 kubectl create -f admin-user.yaml
 ```
-###为用户绑定角色，创建ClusterRoleBinding
+### 为用户绑定角色，创建ClusterRoleBinding
 rolebinding.yaml:
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -386,7 +385,7 @@ kubectl create -f rolebinding.yaml
 也可以把两个yaml文件合成一个，中间用"---"隔开,用一个"kubectl create"语句即可，如下：
 <details><summary>dashboard-adminuser.yaml</summary>
 ```bash
-##创建名为admin-user的用户
+## 创建名为admin-user的用户
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -394,7 +393,7 @@ metadata:
   namespace: kubernetes-dashboard
 ---
 
-##把集群角色cluster-admin绑定到admin-user
+## 把集群角色cluster-admin绑定到admin-user
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -431,7 +430,7 @@ kubectl create clusterrolebinding admin-user -–clusterrole=cluster-admin –-s
 
 ---------
 
-###获取登录密钥
+### 获取登录密钥
 在上面创建用户的时候，kubectl会自动生成一个对应该用户的"secret",”secret“的名字是以用户名为前缀加上"-token-五位随机序列"，例如创建的是"admin-user",在我电脑上的"secret"为"admin-user-token-5fkcr",
 此时通过"kubectl describe"命令即可看到该用户的token，但由于kubernetes中的密钥太多，所以需要用以下命令筛选出需要的密钥:
 ```bash
@@ -442,7 +441,7 @@ kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboar
 ![](https://tva1.sinaimg.cn/large/006y8mN6gy1g8m94rolt9j30mc09zt9t.jpg)
 ![](https://tva1.sinaimg.cn/large/006y8mN6gy1g8m96wbrgyj30y90jw0vh.jpg)
 
-##补充
+## 补充
 以上对官方的yaml做了修改，把dashboard部署方式改为NodePort,以使得可以外网访问，当然这是不太安全的，最好是改为ingress或apiserver方式；如果使用官方默认部署方式，只能本机访问，而且需要先开启代理
 ```
 kubectl proxy
