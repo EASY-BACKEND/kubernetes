@@ -38,22 +38,22 @@ openssl x509 -days 3650 -req -in dashboard.csr -signkey dashboard.key -out dashb
 ## 部署kubernetes-dashboard
 1) 创建部署kubernetes-dashboard的yaml文件
 <details><summary>kubernetes-dashboard.yaml</summary><pre>
-\# Copyright 2017 The Kubernetes Authors.
-\# Licensed under the Apache License, Version 2.0 (the "License");
-\# you may not use this file except in compliance with the License.
-\# You may obtain a copy of the License at
-\# http://www.apache.org/licenses/LICENSE-2.0
-\# Unless required by applicable law or agreed to in writing, software
-\# distributed under the License is distributed on an "AS IS" BASIS,
-\# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-\# See the License for the specific language governing permissions and
-\# limitations under the License.
+# Copyright 2017 The Kubernetes Authors.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
  
 apiVersion: v1
 kind: Namespace
 metadata:
   name: kubernetes-dashboard
-\---
+---
 
 apiVersion: v1
 kind: ServiceAccount
@@ -62,7 +62,7 @@ metadata:
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
   namespace: kubernetes-dashboard
- \---
+ ---
 
 kind: Service
 apiVersion: v1
@@ -79,18 +79,18 @@ spec:
       nodePort: 32100 #NodePort方式端口，改用其它方式把这行去掉
   selector:
     k8s-app: kubernetes-dashboard
-\---
+---
 
-\#不要用自带的证书，自带证书时间出错
-\#apiVersion: v1
-\#kind: Secret
-\#metadata:
-\#  labels:
-\#    k8s-app: kubernetes-dashboard
-\#  name: kubernetes-dashboard-certs
-\#  namespace: kubernetes-dashboard
-\#type: Opaque
-\---
+#不要用自带的证书，自带证书时间出错
+#apiVersion: v1
+#kind: Secret
+#metadata:
+#  labels:
+#    k8s-app: kubernetes-dashboard
+#  name: kubernetes-dashboard-certs
+#  namespace: kubernetes-dashboard
+#type: Opaque
+---
 
 apiVersion: v1
 kind: Secret
@@ -102,7 +102,7 @@ metadata:
 type: Opaque
 data:
   csrf: ""
-\---
+---
 
 apiVersion: v1
 kind: Secret
@@ -112,7 +112,7 @@ metadata:
   name: kubernetes-dashboard-key-holder
   namespace: kubernetes-dashboard
 type: Opaque
-\---
+---
 
 kind: ConfigMap
 apiVersion: v1
@@ -121,7 +121,7 @@ metadata:
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard-settings
   namespace: kubernetes-dashboard
-\---
+---
 
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -136,12 +136,12 @@ rules:
     resources: ["secrets"]
     resourceNames: ["kubernetes-dashboard-key-holder", "kubernetes-dashboard-certs", "kubernetes-dashboard-csrf"]
     verbs: ["get", "update", "delete"]
-    \# Allow Dashboard to get and update 'kubernetes-dashboard-settings' config map.
+    # Allow Dashboard to get and update 'kubernetes-dashboard-settings' config map.
   - apiGroups: [""]
     resources: ["configmaps"]
     resourceNames: ["kubernetes-dashboard-settings"]
     verbs: ["get", "update"]
-    \# Allow Dashboard to get metrics.
+    # Allow Dashboard to get metrics.
   - apiGroups: [""]
     resources: ["services"]
     resourceNames: ["heapster", "dashboard-metrics-scraper"]
@@ -150,7 +150,7 @@ rules:
     resources: ["services/proxy"]
     resourceNames: ["heapster", "http:heapster:", "https:heapster:", "dashboard-metrics-scraper", "http:dashboard-metrics-scraper"]
     verbs: ["get"]
-\---
+---
 
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
@@ -163,7 +163,7 @@ rules:
   - apiGroups: ["metrics.k8s.io"]
     resources: ["pods", "nodes"]
     verbs: ["get", "list", "watch"]
-\---
+---
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -180,7 +180,7 @@ subjects:
   - kind: ServiceAccount
     name: kubernetes-dashboard
     namespace: kubernetes-dashboard
-\---
+---
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -195,7 +195,7 @@ subjects:
   - kind: ServiceAccount
     name: kubernetes-dashboard
     namespace: kubernetes-dashboard
-\---
+---
 
 kind: Deployment
 apiVersion: apps/v1
@@ -254,7 +254,7 @@ spec:
       tolerations:
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
-\---
+---
 
 kind: Service
 apiVersion: v1
@@ -269,7 +269,7 @@ spec:
       targetPort: 8000
   selector:
     k8s-app: dashboard-metrics-scraper
-\---
+---
 
 kind: Deployment
 apiVersion: apps/v1
@@ -384,7 +384,7 @@ kubectl create -f rolebinding.yaml
 
 也可以把两个yaml文件合成一个，中间用"---"隔开,用一个"kubectl create"语句即可，如下：
 <details><summary>dashboard-adminuser.yaml</summary>
-```bash
+<pre>
 ## 创建名为admin-user的用户
 apiVersion: v1
 kind: ServiceAccount
@@ -406,7 +406,7 @@ subjects:
 - kind: ServiceAccount
   name: admin-user
   namespace: kubernetes-dashboard
-```
+</pre>
 </details>
 <details><summary>操作命令:</summary>
 ```bash
@@ -419,13 +419,13 @@ kubectl create -f dashboard-adminuser.yaml
 不用配置文件，直接命令行也是可以的:
 <details><summary>示例</summary>
 在"kubernetes-dashboard"命名空间下创建一个名为"admin-user"的用户:
-```bash
+<pre>
 kubectl create serviceaccount admin-user -n kubernetes-dashboard
-```
+</pre>
 创建一个叫"admin-user"的“角色绑定”,给"admin-user"用户授予"cluster-admin"角色:
-```bash
+<pre>
 kubectl create clusterrolebinding admin-user -–clusterrole=cluster-admin –-serviceaccount=kubernetes-dashboard:admin-user
-```
+</pre>
 </details>
 
 ---------
