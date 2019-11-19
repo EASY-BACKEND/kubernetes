@@ -1,17 +1,17 @@
-#单节点Kubernetes部署
-##参考资料:
+# 单节点Kubernetes部署
+## 参考资料:
 * [kubernetes官网英文版](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
 * [kubernetes官网中文版](https://kubernetes.io/zh/docs/setup/independent/install-kubeadm/)
 
 ---
 
-##环境、工具
+## 环境、工具
 阿里云学生机ECS、Ubuntu、docker、kubectl1.15.4、kubelet1.15.4、kubeadm1.15.4、
 
 ---
 
-##安装kubeadm、kubectl、kubelet
-###配置软件源
+## 安装kubeadm、kubectl、kubelet
+### 配置软件源
 默认apt软件源里没有这几个软件，需要添加谷歌官方的软件源。但又由于官方提供的源无法访问，需要改为阿里的源
 ```bash
 curl -s https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -
@@ -37,7 +37,7 @@ apt-get update && apt-get install -y apt-transport-https curl
 ![](https://tva1.sinaimg.cn/large/006y8mN6gy1g8rx5myn55j30m005pgln.jpg)
 
 
-###选择软件版本
+### 选择软件版本
 kubeadm、kubectl、kubelet三者的版本要一致，否则可能会部署失败，小版本号不同倒也不会出什么问题，不过尽量安装一致的版本。记住kubelet的版本不可以超过API server的版本。例如1.8.0的API server可以适配 1.7.0的kubelet，反之就不行了。
 可以通过"apt-cache madison"命令来查看可供安装的软件的版本号
 例：
@@ -45,7 +45,7 @@ kubeadm、kubectl、kubelet三者的版本要一致，否则可能会部署失�
 apt-cache madison kubeadm kubelet kubectl
 ```
 
-###开始安装
+### 开始安装
 这里安装的版本是"1.15.4-00"，别忘了后面的"-00"。
 需要注意，安装kubeadm的时候，会自动安装kubectl、kubelet和cri-tool，安装kubelet时会自动安装kubernetes-cni，如下：
 ![](https://tva1.sinaimg.cn/large/006y8mN6gy1g8rxx2lsk0j30mm08p75a.jpg)
@@ -65,8 +65,8 @@ apt-mark unhold kubeadm kubectl kubelet
 
 ---
 
-##部署前准备
-###关闭防火墙
+## 部署前准备
+### 关闭防火墙
 在ubuntu下，可以使用"ufw"管理防火墙。
 查看防火墙状态：
 ```bash
@@ -80,14 +80,14 @@ ufw diable
 ```bash
 ufw enable
 ```
-###关闭selinux
+### 关闭selinux
 阿里云ecs没有selinux，在此不作验证，网上找到的方法如下:
 * 修改/etc/selinux/config文件中设置SELINUX=disabled，然后重启服务器
 * 使用setenforce
   * setenforce 1 设为enforcing模式
   * setenforce 0 设为permissive模式
 
-###关闭swap
+### 关闭swap
 * 临时修改，重启复原
   * 关闭 
   ```bash
@@ -107,13 +107,13 @@ ufw enable
     
   1. 修改"/etc/fstab"文件，在"/swapfile"一行前加#禁用并保存退出重启服务器
 
-###开启kubelet服务
+### 开启kubelet服务
 ```
 systemctl enable kubelet
 ```
 
 
-###修改Docker的cgroup-driver
+### 修改Docker的cgroup-driver
 编辑"/etc/docker/daemon.json"
 添加如下信息:
 ```bash
@@ -126,7 +126,7 @@ systemctl daemon-reload
 systemctl restart docker
 ```
 
-###拉取镜像
+### 拉取镜像
 查看kubeadm需要的镜像:
 ```bash
 kubeadm config images list --kubernetes-version=1.15.4
@@ -176,7 +176,7 @@ bash $HOME/pull-k8s-images.sh
 
 ---  
 
-##开始部署
+## 开始部署
 ```bash
 kubeadm init --kubernetes-version=v1.15.4 --ignore-preflight-errors=NumCPU --pod-network-cidr=10.244.0.0/16 
 ```
@@ -198,7 +198,7 @@ kubeadm init --kubernetes-version=v1.15.4 --ignore-preflight-errors=NumCPU --pod
 
 ---
 
-##查看部署状态
+## 查看部署状态
 ![](https://tva1.sinaimg.cn/large/006y8mN6gy1g92im4qgl9j30sg0bjjt7.jpg)
 &emsp;&emsp;当看到上述信息就表示集群Master节点初始化成功，在同一网络下的机器上同样地安装kuneadm、kubelet并配置好环境之后，即可通过"kubeadm join"命令连接到Master节点使集群成为多节点集群:
 ```bash
@@ -223,7 +223,7 @@ export KUBECONFIG=/etc/kubernetes/admin.conf
 
 ---
 
-##安装网络插件
+## 安装网络插件
 网络插件有很多种，此处选择"flannel"，flannel的安装比较简单，直接指定配置文件，用"kubectl"安装即可。配置文件如下:
 <details><summary>flannel.yaml</summary>
 ```bash
@@ -841,8 +841,8 @@ kubectl create -f <flannel_yaml_path>
 
 ---
 
-##测试
-###处理taint
+## 测试
+### 处理taint
 默认情况下，master节点会被打上一个叫"NoSchedule"的Taint(污点)，可以通过"kubectl describe"看到:
 ![](https://tva1.sinaimg.cn/large/006y8mN6gy1g93bbdazqhj30kb08umyr.jpg)
 这个taint使得master节点不能被调度，也就是说master节点不能部署应用，由于现在搭建的是单节点集群，当前节点既充当master又得充当worker，所以需要把这个taint去掉:
@@ -863,9 +863,9 @@ kubectl run nginx --image=nginx
 
 ---
 
-##排错工具
-###kubectl 
-#####kubectl get \<resource_type>
+## 排错工具
+### kubectl 
+##### kubectl get \<resource_type>
 &emsp;&emsp;"kubectl get"可以列出集群环境中的某类资源，对于k8s，几乎所有内容都是“资源”，如Node、Pod、Service等，只要把"\<resource_type>"替换成想查看的资源类型即可。
 如查看节点资源:
 ```bash
@@ -885,7 +885,7 @@ kubectl get pod --all-namespaces
 
 ---
 
-#####kubectl describe \<resource_type> \<resource_name>
+##### kubectl describe \<resource_type> \<resource_name>
 &emsp;&emsp;对于处于异常状态的资源，可以使用该命令查看其详细信息，只要把\<resource_type>替换成资源类别，把\<resource_name>替换成资源名称即可，当然也还需要用"-n"指明"namespaces"。
 如:
 ```bash
@@ -896,7 +896,7 @@ kubectl describe pod -n kubernetes-dashboard kubernetes-dashboard-6b855d4584-9sg
 
 ---
 
-#####docker ps -a
+##### docker ps -a
 &emsp;&emsp;该命令可以查看当前所有docker容器，"-a"表示所有容器，当不加该参数时，显示的则是正在运行的容器。由于要查看的是k8s相关的容器，以此可以使用管道命令和"grep"对显示结果进行筛选:
 ```bash
 docker ps -a | grep kube
@@ -909,7 +909,7 @@ docker logs 37443d902aee
 
 ---
 
-##友情链接
+## 友情链接
 [Kubernetes最佳实践之：命名空间（Namespace）](https://blog.csdn.net/ouyangtianhan/article/details/85107967)
 
 
