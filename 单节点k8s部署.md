@@ -199,7 +199,9 @@ kubeadm init --kubernetes-version=v1.15.4 --ignore-preflight-errors=NumCPU --pod
 ---
 
 ## 查看部署状态
+
 ![](https://tva1.sinaimg.cn/large/006y8mN6gy1g92im4qgl9j30sg0bjjt7.jpg)
+
 &emsp;&emsp;当看到上述信息就表示集群Master节点初始化成功，在同一网络下的机器上同样地安装kuneadm、kubelet并配置好环境之后，即可通过"kubeadm join"命令连接到Master节点使集群成为多节点集群:
 ```bash
 kubeadm join 192.168.1.73:6443 --token gkp9ws.rv2guafeusg7k746 \
@@ -226,7 +228,7 @@ export KUBECONFIG=/etc/kubernetes/admin.conf
 ## 安装网络插件
 网络插件有很多种，此处选择"flannel"，flannel的安装比较简单，直接指定配置文件，用"kubectl"安装即可。配置文件如下:
 <details><summary>flannel.yaml</summary>
-```bash
+<pre>
 ---
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
@@ -829,9 +831,11 @@ spec:
         - name: flannel-cfg
           configMap:
             name: kube-flannel-cfg
-```
+</pre>
 </details>
+
 ![](https://tva1.sinaimg.cn/large/006y8mN6gy1g9391bsfyxj30bb04gjrr.jpg)
+
 128行的network数值应与"kubeadm"初始化时指定的"--pod-network-cidr"一致，该值表示给pod分配ip时的ip前缀。
 创建好配置文件后，通过"kubeclt"安装flannel:
 ```bash
