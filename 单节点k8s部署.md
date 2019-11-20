@@ -126,54 +126,6 @@ systemctl daemon-reload
 systemctl restart docker
 ```
 
-### 拉取镜像
-查看kubeadm需要的镜像:
-```bash
-kubeadm config images list --kubernetes-version=1.15.4
-```
-结果如下:
-![](https://tva1.sinaimg.cn/large/006y8mN6gy1g92h27b8wgj30m008wwf0.jpg)
-&emsp;&emsp;这些都是k8s基本组件的镜像，通过kubeadm初始化集群时，kubeadm先检查本地是否已有这些镜像并拉取缺失的镜像，接着生成配置文件，再然后构建容器运行，即可完成集群的初始化工作。
-&emsp;&emsp;由于kubeadm默认指定的镜像源需要挂梯子才能访问，因此，可以手动查找合适的镜像拉取到本地，再通过tag把镜像更名成和上诉"list"的结果一样。但是该操作过于繁琐，可以写脚本来实现，网上也有很多这样的脚本，这里贴一份:
-```bash
-cat <<EOF >$HOME/pull-k8s-images.sh
-#!/bin/bash
-KUBE_VERSION=v1.15.4
-KUBE_PAUSE_VERSION=3.1
-ETCD_VERSION=3.3.10
-DNS_VERSION=1.3.1
-username=mirrorgooglecontainers
-
-images="kube-proxy-amd64:\${KUBE_VERSION} 
-kube-scheduler-amd64:\${KUBE_VERSION} 
-kube-controller-manager-amd64:\${KUBE_VERSION} 
-kube-apiserver-amd64:\${KUBE_VERSION} 
-pause:\${KUBE_PAUSE_VERSION} 
-etcd-amd64:\${ETCD_VERSION} 
-"
-
-for image in \$images
-do
-    ##remove "-amd64"
-    newImage=\${image//-amd64/}
-    docker pull \${username}/\${image}
-    docker tag \${username}/\${image} k8s.gcr.io/\${newImage}
-    docker rmi \${username}/\${image}
-done
-docker pull coredns/coredns:\${DNS_VERSION}
-docker tag coredns/coredns:\${DNS_VERSION} k8s.gcr.io/coredns:\${DNS_VERSION}
-docker rmi coredns/coredns:\${DNS_VERSION}
-#remove var
-unset ARCH version images username
-EOF
-```
-&emsp;&emsp;需要根据自己的需求修改脚本内容，镜像源地址在短期内应该还是有效的。
-这时候在执行"$HOME"目录下的"pull-k8s-images.sh"脚本即可。
-```bash
-bash $HOME/pull-k8s-images.sh
-```
-&emsp;&emsp;镜像拉取完了，用"docker images -a"命令查看是否与之前list的结果一样，也可以用"kubeadm config images pull --kubernetes-version=1.15.4"尝试拉取，一般不报错就没问题。
-
 ---  
 
 ## 开始部署
